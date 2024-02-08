@@ -1,4 +1,5 @@
 package launcher;
+
 import javax.swing.SwingUtilities;
 
 import gui.WeatherAppGui;

@@ -5,4 +5,17 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>Weather App</name>
   <description>Weather App</description>
+  <properties>
+    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+  </properties>
+  
+   <dependencies>
+		 <dependency>
+		    <groupId>com.googlecode.json-simple</groupId>
+		    <artifactId>json-simple</artifactId>
+		    <version>1.1.1</version>
+		</dependency>
+  </dependencies>
+  
 </project>

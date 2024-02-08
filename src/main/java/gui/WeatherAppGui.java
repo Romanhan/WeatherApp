@@ -2,6 +2,8 @@ package gui;
 
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -14,7 +16,13 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import org.json.simple.JSONObject;
+
+import client.WeatherApiClient;
+
 public class WeatherAppGui extends JFrame {
+
+	private static JSONObject weatherData;
 
 	public WeatherAppGui() {
 		super("Weather App");
@@ -34,11 +42,6 @@ public class WeatherAppGui extends JFrame {
 		searchTextField.setFont(new Font("Dialog", Font.PLAIN, 24));
 		add(searchTextField);
 
-		JButton searchButton = new JButton(loadImage("src/main/resources/assets/search.png"));
-		searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		searchButton.setBounds(375, 13, 47, 45);
-		add(searchButton);
-
 		JLabel weatherConditionImage = new JLabel(loadImage("src/main/resources/assets/cloud.png"));
 		weatherConditionImage.setBounds(0, 125, 450, 217);
 		add(weatherConditionImage);
@@ -49,11 +52,11 @@ public class WeatherAppGui extends JFrame {
 		temperatureText.setHorizontalAlignment(SwingConstants.CENTER);
 		add(temperatureText);
 
-		JLabel weaterConditionDesc = new JLabel("Cloudy");
-		weaterConditionDesc.setBounds(0, 405, 450, 36);
-		weaterConditionDesc.setFont(new Font("Dialog", Font.PLAIN, 32));
-		weaterConditionDesc.setHorizontalAlignment(SwingConstants.CENTER);
-		add(weaterConditionDesc);
+		JLabel weatherConditionDesc = new JLabel("Cloudy");
+		weatherConditionDesc.setBounds(0, 405, 450, 36);
+		weatherConditionDesc.setFont(new Font("Dialog", Font.PLAIN, 32));
+		weatherConditionDesc.setHorizontalAlignment(SwingConstants.CENTER);
+		add(weatherConditionDesc);
 
 		JLabel humidityImage = new JLabel(loadImage("src/main/resources/assets/water-drop.png"));
 		humidityImage.setBounds(15, 500, 74, 66);
@@ -73,6 +76,45 @@ public class WeatherAppGui extends JFrame {
 		windSpeedText.setBounds(310, 500, 85, 55);
 		windSpeedText.setFont(new Font("Dialog", Font.PLAIN, 16));
 		add(windSpeedText);
+
+		JButton searchButton = new JButton(loadImage("src/main/resources/assets/search.png"));
+		searchButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		searchButton.setBounds(375, 13, 47, 45);
+		searchButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String userInput = searchTextField.getText();
+				if (userInput.replaceAll("\\s", "").length() <= 0) {
+					return;
+				}
+
+				weatherData = WeatherApiClient.getWeatherData(userInput);
+
+				String weatherCondition = (String) weatherData.get("weather_condition");
+
+				switch (weatherCondition) {
+				case "Clear" -> weatherConditionImage.setIcon(loadImage("src/main/resources/assets/sun.png"));
+				case "Cloudy" -> weatherConditionImage.setIcon(loadImage("src/main/resources/assets/cloud.png"));
+				case "Rain" -> weatherConditionImage.setIcon(loadImage("src/main/resources/assets/rain.png"));
+				case "Snow" -> weatherConditionImage.setIcon(loadImage("src/main/resources/assets/snow.png"));
+				}
+
+				double temperature = (double) weatherData.get("temperature");
+				temperatureText.setText(temperature + " C");
+
+				weatherConditionDesc.setText(weatherCondition);
+
+				long humidity = (long) weatherData.get("humidity");
+				humidityText.setText("<html><b>Humidity</b> " + humidity + "%</html>");
+
+				double windSpeed = (double) weatherData.get("windSpeed");
+				windSpeedText.setText("<html><b>Windspeed</b> " + windSpeed + "km/h</html>");
+
+			}
+		});
+		add(searchButton);
+
 	}
 
 	private ImageIcon loadImage(String resourcePath) {
